@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Union
 from faucet_proj import secrets
 import dateparser
+import validators
 import requests
 import re
 
@@ -83,3 +84,18 @@ def extract_tweet_id(string: str) -> Optional[int]:
 
     matches: list = list(map(int, re.findall(r'(\d+)', string)))
     return None if not matches else matches[0]
+
+def is_valid_url(string: str) -> bool:
+    """
+    A simple method which checks if a given string is a valid url or not.
+
+    # Arguments
+
+    * `string: str` - A string of the potential url.
+
+    # Returns
+
+    * `bool` - A boolean of whether the given url is a valid url or not.
+    """
+
+    return bool(validators.url(string))
