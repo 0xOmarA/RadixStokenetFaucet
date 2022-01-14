@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from typing import List
+from .faucet_option import FaucetOption
 from . import secrets
 import Radix
 
@@ -136,3 +138,13 @@ The wallet object used to distribute the tokens. This wallet is connected
 to the default Stokenet node and obtains its mnemonic phrase from the secrets
 file.
 """
+
+MINIMUM_ACCOUNT_AGE: int = 2
+"""
+This is the minumum account age in months. A twitter account needs to be more than
+`MINIMUM_ACCOUNT_AGE` months old for their XRD request to be go through.
+"""
+
+FAUCET_OPTIONS: List[FaucetOption] = [
+    FaucetOption(xrd_amount = 20, cooldown_in_hours = 3),
+]

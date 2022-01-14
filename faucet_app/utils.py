@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 from faucet_proj import secrets
 import dateparser
 import validators
@@ -44,7 +44,7 @@ def load_tweet_info(tweet_id: Union[int, str]) -> dict:
     # check for errors using the 'error' key in the json response because the 
     # status code returned from the twitter API is 200 even if the tweet is not
     # found.
-    if 'error' in response_json.keys():
+    if 'errors' in response_json.keys():
         raise Exception(f"An error has occured while getting the information of the tweet. Error: {response_json}")
 
     user_object: Dict[str, str] = list(filter(lambda x: x['id'] == response_json['data']['author_id'], response_json['includes']['users']))[0]
@@ -71,19 +71,28 @@ def extract_tweet_id(string: str) -> Optional[int]:
 
     * `Optional[int]` - Returns an integer of the tweet id when it is found. If it's not 
     found then None is returned.
-
-    # Note
-    
-    A tweet id is defined with the regex expression to be (\d+). So it is any collection
-    of numbers that follow one another. Of course, this is quite general and can be 
-    improved, but this is the first implementation of this function.
-
-    At the current moment of time, this function returns the first instance that it finds
-    for a tweet id. Other parts of the text which fit the regex (\d+) are ignored.
     """
 
-    matches: list = list(map(int, re.findall(r'(\d+)', string)))
+    matches: list = list(map(int, re.findall(r'twitter\.com\/.*\/status(?:es)?\/([^\/\?]+)', string)))
     return None if not matches else matches[0]
+
+def extract_stokenet_addresses(string: str) -> List[str]:
+    """
+    A method which is used to extract all of the stokenet addresses from a given string
+
+    # Arguments
+
+    * `string: str` - The string to look for the testnet addresses in.
+
+    # Returns
+
+    * `List[str]` - A list of strings of the stokenet addresses found in the string
+    """
+
+    return re.findall(
+        pattern = r'(tdx[0-9]?1[023456789ACDEFGHJKLMNPQRSTUVWXYZacdefghjklmnpqrstuvwxyz]{6,69})',
+        string = string
+    )
 
 def is_valid_url(string: str) -> bool:
     """
