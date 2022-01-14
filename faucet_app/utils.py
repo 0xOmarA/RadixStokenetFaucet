@@ -1,17 +1,17 @@
+from typing import Dict, Optional, Union
 from faucet_proj import secrets
-from typing import Dict
-import requests
 import dateparser
+import requests
+import re
 
-
-def load_tweet_info(tweet_id: int) -> dict:
+def load_tweet_info(tweet_id: Union[int, str]) -> dict:
     """
     This method is used to load the information for a given tweet through the twitter
     API and the bearer token saved in the secrets.py file.
 
     # Arguments
 
-    * `tweet_id: int` - An integer of the tweet id
+    * `tweet_id: Union[int, str]` - An integer of the tweet id
 
     # Returns
 
@@ -57,3 +57,29 @@ def load_tweet_info(tweet_id: int) -> dict:
         "tweet_created_at": dateparser.parse(response_json['data']['created_at']),
         "user_created_at": dateparser.parse(user_object['created_at']),
     }
+
+def extract_tweet_id(string: str) -> Optional[int]:
+    """
+    This method is used to search for the tweet id in a given string and return it.
+
+    # Arguments
+
+    * `string: str` - A string to look for the tweet id in.
+
+    # Returns
+
+    * `Optional[int]` - Returns an integer of the tweet id when it is found. If it's not 
+    found then None is returned.
+
+    # Note
+    
+    A tweet id is defined with the regex expression to be (\d+). So it is any collection
+    of numbers that follow one another. Of course, this is quite general and can be 
+    improved, but this is the first implementation of this function.
+
+    At the current moment of time, this function returns the first instance that it finds
+    for a tweet id. Other parts of the text which fit the regex (\d+) are ignored.
+    """
+
+    matches: list = list(map(int, re.findall(r'(\d+)', string)))
+    return None if not matches else matches[0]
