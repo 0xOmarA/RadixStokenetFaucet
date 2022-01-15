@@ -50,10 +50,10 @@ def load_tweet_info(tweet_id: Union[int, str]) -> dict:
     user_object: Dict[str, str] = list(filter(lambda x: x['id'] == response_json['data']['author_id'], response_json['includes']['users']))[0]
     
     return {
-        "author_id": user_object['id'],
+        "author_id": int(user_object['id']),
         "username": user_object['username'],
         "name_of_user": user_object['name'],
-        "tweet_id": response_json['data']['id'],
+        "tweet_id": int(response_json['data']['id']),
         "tweet_text": response_json['data']['text'],
         "tweet_created_at": dateparser.parse(response_json['data']['created_at']),
         "user_created_at": dateparser.parse(user_object['created_at']),

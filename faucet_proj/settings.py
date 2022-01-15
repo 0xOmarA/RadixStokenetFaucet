@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'faucet_app'
 ]
 
 MIDDLEWARE = [
@@ -139,7 +140,7 @@ to the default Stokenet node and obtains its mnemonic phrase from the secrets
 file.
 """
 
-MINIMUM_ACCOUNT_AGE: int = 2
+MINIMUM_ACCOUNT_AGE: int = 0 if DEBUG else 2
 """
 This is the minumum account age in months. A twitter account needs to be more than
 `MINIMUM_ACCOUNT_AGE` months old for their XRD request to be go through.

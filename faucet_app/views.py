@@ -1,12 +1,16 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
-from typing import Dict, List
+from typing import Dict, List, Optional
 from tldextract import extract
+from faucet_proj.faucet_option import FaucetOption
+from faucet_app.models import FaucetRequest
 from . import utils as script_utils
 import datetime
+import Radix
 import json
 
 @csrf_exempt
@@ -38,13 +42,28 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
         return JsonResponse(
             data = {
                 'error': 'Required keys not found',
-                'message': 'It is required that the JSON string in the request body contain the tweet_url and xrd_amount keys.'
+                'message': 'It is required that the JSON string in the request body contain the `tweet_url` and `xrd_amount` keys.'
             },
             status = 400
         )
 
-    # Getting the url that was sent in the request body
+    # Getting the url that was sent in the request body and the amount of XRD
+    # that was requested
     url: str = json_data['tweet_url']
+    xrd_requested: float = float(json_data['xrd_amount'])
+
+    # Getting the correct `FaucetOption` associated with the requested amount.
+    matches: List[FaucetOption] = list(filter(lambda x: float(x.xrd_amount) == xrd_requested ,settings.FAUCET_OPTIONS))
+    if not matches:
+        return JsonResponse(
+            data = {
+                'error': 'Invalid XRD amount requested',
+                'message': 'You have requested an amount of XRD which the system can not support.'
+            },
+            status = 400
+        )
+    
+    faucet_option: FaucetOption = matches[0]
 
     # Ensure that the url provided is a valid url and that the domain that
     # the url points to is the twitter domain
@@ -92,14 +111,78 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
         return JsonResponse(
             data = {
                 'error': 'Twitter account is too young.',
-                'message': f'Your account is too young to perform this action. We require that a twitter account be at least {settings.MINIMUM_ACCOUNT_AGE*30} days old before they can request XRD to their Stokenet address. Your account is currently {current_account_age.total_seconds() / 86400: .2f} days old.'
+                'message': f'Your account is too young to perform this action. We require that a twitter account be at least {settings.MINIMUM_ACCOUNT_AGE*30} days old before they can request XRD to their Stokenet address. Your account is currently {current_account_age.total_seconds() / 86400:.2f} days old.'
             },
             status = 400
         )
 
     # Check if there has been any requests made to this wallet address or from 
     # this twitter account where the cooldown has not expired yet.
+    try:
+        last_request_by_twitter_user: FaucetRequest = FaucetRequest.objects.get(twitter_author_id = tweet_info['author_id'])
+        if last_request_by_twitter_user is not None and not last_request_by_twitter_user.is_cooldown_over():
+            return JsonResponse(
+                data = {
+                    'error': 'Twitter account is in cooldown',
+                    'message': f'Your twitter account was recently used by the faucet to send XRD. You can make another request in: {last_request_by_twitter_user.seconds_until_cooldown_ends() / 60:.2f} minutes.'
+                },
+                status = 400
+            )
+    except ObjectDoesNotExist:
+        pass
 
-    return HttpResponse('hey')
+    try:
+        last_request_for_wallet_address: FaucetRequest = FaucetRequest.objects.get(wallet_address = wallet_address)
+        if last_request_for_wallet_address is not None and not last_request_for_wallet_address.is_cooldown_over():
+            return JsonResponse(
+                data = {
+                    'error': 'Wallet address is in cooldown',
+                    'message': f'The faucet has recently sent your wallet address XRD. You can make another request in: {last_request_for_wallet_address.seconds_until_cooldown_ends() / 60:.2f} minutes.'
+                },
+                status = 400
+            )
+    except ObjectDoesNotExist:
+        pass
+
+    # If we get to this point here, it means that we can indeed send XRD to this wallet
+    # address.
+    try:
+        wallet: Radix.Wallet = settings.WALLET
+        tx_id: str = wallet.build_sign_and_send_transaction(
+            actions = Radix.Action.new_token_transfer_action(
+                from_address = wallet.wallet_address,
+                to_address = wallet_address,
+                amount = Radix.utils.xrd_to_atto(faucet_option.xrd_amount),
+                rri = Radix.NetworkSpecificConstants.XRD[Radix.Network.STOKENET]
+            ),
+            message = f"Here is {faucet_option.xrd_amount:.2f} XRD for your tweet: {tweet_id}",
+            encrypt_message = True,
+            encrypt_for_address = wallet_address
+        )
+
+        FaucetRequest.objects.create(
+            requested_at = timezone.now(),
+            wallet_address = wallet_address,
+            xrd_amount_requested = faucet_option.xrd_amount,
+            cooldown_period_in_hours = faucet_option.cooldown_in_hours,
+            tweet_id = tweet_id,
+            tweet_link = url,
+            twitter_author_id = tweet_info['author_id']
+        )
+
+        return JsonResponse({
+            'success': True,
+            'tx_id': tx_id,
+            'message': f"The requested XRD have been sent in transaction: {tx_id}"
+        })
+    
+    except Exception as e:
+        return JsonResponse(
+            data = {
+                'error': 'Unexpected Error',
+                'message': f'An unexpected error has occured. Error: {e}'
+            },
+            status = 500
+        )
 
 # TODO: Implement CSRF tokens for the xrd_request endpoint.
