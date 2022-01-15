@@ -30,7 +30,7 @@ SECRET_KEY = secrets.django_secret_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.StokenetFaucet.com', 'StokenetFaucet.com']
 
 
 # Application definition
