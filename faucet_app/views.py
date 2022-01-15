@@ -119,12 +119,12 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
     # Check if there has been any requests made to this wallet address or from 
     # this twitter account where the cooldown has not expired yet.
     try:
-        last_request_by_twitter_user: FaucetRequest = FaucetRequest.objects.get(twitter_author_id = tweet_info['author_id'])
-        if last_request_by_twitter_user is not None and not last_request_by_twitter_user.is_cooldown_over():
+        last_request_by_twitter_user: FaucetRequest = list(FaucetRequest.objects.all().filter(twitter_author_id = tweet_info['author_id']))
+        if last_request_by_twitter_user and not last_request_by_twitter_user[-1].is_cooldown_over():
             return JsonResponse(
                 data = {
                     'error': 'Twitter account is in cooldown',
-                    'message': f'Your twitter account was recently used by the faucet to send XRD. You can make another request in: {last_request_by_twitter_user.seconds_until_cooldown_ends() / 60:.2f} minutes.'
+                    'message': f'Your twitter account was recently used by the faucet to send XRD. You can make another request in: {last_request_by_twitter_user[-1].seconds_until_cooldown_ends() / 60:.2f} minutes.'
                 },
                 status = 400
             )
@@ -132,12 +132,12 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
         pass
 
     try:
-        last_request_for_wallet_address: FaucetRequest = FaucetRequest.objects.get(wallet_address = wallet_address)
-        if last_request_for_wallet_address is not None and not last_request_for_wallet_address.is_cooldown_over():
+        last_request_for_wallet_address: FaucetRequest = list(FaucetRequest.objects.all().filter(wallet_address = wallet_address))
+        if last_request_for_wallet_address and not last_request_for_wallet_address[-1].is_cooldown_over():
             return JsonResponse(
                 data = {
                     'error': 'Wallet address is in cooldown',
-                    'message': f'The faucet has recently sent your wallet address XRD. You can make another request in: {last_request_for_wallet_address.seconds_until_cooldown_ends() / 60:.2f} minutes.'
+                    'message': f'The faucet has recently sent your wallet address XRD. You can make another request in: {last_request_for_wallet_address[-1].seconds_until_cooldown_ends() / 60:.2f} minutes.'
                 },
                 status = 400
             )
@@ -201,3 +201,12 @@ def wallet_balance(request: HttpRequest) -> HttpResponse:
             'success': True,
             'message': Radix.utils.atto_to_xrd(wallet.get_balance_of_token(Radix.NetworkSpecificConstants.XRD[Radix.Network.STOKENET]))
         })
+
+def faucet_homepage(request: HttpRequest) -> HttpResponse:
+    return render(
+        request = request,
+        template_name = 'home.html',
+        context = {
+            'faucet_options': settings.FAUCET_OPTIONS
+        }
+    )

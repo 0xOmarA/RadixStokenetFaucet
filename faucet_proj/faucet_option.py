@@ -35,4 +35,5 @@ class FaucetOption():
 
     def __str__(self) -> str:
         """ A string representation of this Option object """
-        return f"{self.xrd_amount} XRD ({self.cooldown_in_hours:.2f} hours cooldown)"
+        # return f"{self.xrd_amount} XRD ({self.cooldown_in_hours:.2f} hours cooldown)"
+        return f"{int(self.xrd_amount)} XRD ({int(self.cooldown_in_hours)} hours cooldown)"
