@@ -78,7 +78,16 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
 
     # Getting the tweet id and then getting the tweet's information
     tweet_id: int = script_utils.extract_tweet_id(url)
-    tweet_info: dict = script_utils.load_tweet_info(tweet_id)
+    try:
+        tweet_info: dict = script_utils.load_tweet_info(tweet_id)
+    except:
+        return JsonResponse(
+            data = {
+                'error': 'Invalid Tweet',
+                'message': 'You have provided a link to a tweet which seems to not be available. Is it possible that your account is private or that the tweet was deleted?'
+            },
+            status = 400
+        )
 
     # Getting the addresses included in the body of the tweet. 
     radix_addresses: List[str] = script_utils.extract_stokenet_addresses(tweet_info['tweet_text'])
