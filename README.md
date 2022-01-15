@@ -80,3 +80,7 @@ There are many ways in which you can help this project out:
 
 * Directly supporting and helping maintain the codebase and helping add additional features to the site.
 * Eventually, the XRD in my Stokenet wallet will run out and the faucet will be dried out... If you have some extra Stokenet XRD, please send them to this address: `tdx1qspqqecwh3tgsgz92l4d4f0e4egmfe86049dj75pgq347fkkfmg84pgx9um0v`. The Stokenet XRD you send to this address will be used to send XRD to other users.
+
+## Acknowledgements
+
+I would like to thank all of the people who contribute on [RadixTalk](https://radixtalk.com/) and especially Stuart for helping me and the Radix community in general in figuring out how the Radix wallet works, how RRIs are calculated, how the message encryption works, as well as many many other things. 
