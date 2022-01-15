@@ -185,4 +185,19 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
             status = 500
         )
 
-# TODO: Implement CSRF tokens for the xrd_request endpoint.
+def wallet_balance(request: HttpRequest) -> HttpResponse:
+    # Checking for requests and only allowing GET requests to the endpoint.
+    if request.method != 'GET':
+        return JsonResponse(
+            data = {
+                'error': 'Invalid Request Method',
+                'message': 'This endpoint only accepts GET requests.'
+            },
+            status = 400
+        )
+
+    wallet: Radix.Wallet = settings.WALLET
+    return JsonResponse({
+            'success': True,
+            'message': Radix.utils.atto_to_xrd(wallet.get_balance_of_token(Radix.NetworkSpecificConstants.XRD[Radix.Network.STOKENET]))
+        })
