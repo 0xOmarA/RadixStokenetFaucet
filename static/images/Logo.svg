@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="255" height="255" viewBox="0 0 255 255">
+  <defs>
+    <clipPath id="clip-Artboard_1">
+      <rect width="255" height="255"/>
+    </clipPath>
+  </defs>
+  <g id="Artboard_1" data-name="Artboard 1" clip-path="url(#clip-Artboard_1)">
+    <rect width="255" height="255" fill="#fff"/>
+    <g id="Group_2" data-name="Group 2" transform="translate(-7 10.925)">
+      <g id="Group_1" data-name="Group 1" transform="translate(2 -2)">
+        <text id="SF" transform="translate(133 152)" fill="#003057" font-size="70" font-family="IBMPlexSans-Bold, IBM Plex Sans" font-weight="700"><tspan x="0" y="0">SF</tspan></text>
+      </g>
+      <path id="Path_5" data-name="Path 5" d="M95.924,160.033a6.374,6.374,0,0,1-5.169-2.645L65.48,122.37H49V109.617H68.742a6.376,6.376,0,0,1,5.17,2.645l20.649,28.609,31.514-71.977a6.376,6.376,0,0,1,5.841-3.819H171.3V77.828H136.086l-34.32,78.386A6.375,6.375,0,0,1,96.6,160a6.152,6.152,0,0,1-.677.036" fill="#24b47e"/>
+    </g>
+  </g>
+</svg>
