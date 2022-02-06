@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List
 from .faucet_option import FaucetOption
 from . import secrets
-import Radix
+import radixlib as radix
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +30,7 @@ SECRET_KEY = secrets.django_secret_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.StokenetFaucet.com', 'StokenetFaucet.com']
+ALLOWED_HOSTS = ['www.StokenetFaucet.com', 'StokenetFaucet.com'] + (['localhost'] if DEBUG else [])
 
 
 # Application definition
@@ -135,9 +135,9 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # The wallet object which we will be using to distribute the tokens
-WALLET: Radix.Wallet = Radix.Wallet(
-    provider = Radix.Provider(Radix.Network.STOKENET),
-    signer = Radix.Signer.from_mnemonic(secrets.mnemonic_phrase)
+WALLET: radix.Wallet = radix.Wallet(
+    provider = radix.Provider(radix.network.STOKENET),
+    signer = radix.Signer.from_mnemonic(secrets.mnemonic_phrase)
 )
 """ 
 The wallet object used to distribute the tokens. This wallet is connected 

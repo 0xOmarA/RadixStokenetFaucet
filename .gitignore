@@ -153,3 +153,4 @@ cython_debug/
 
 # The secrets file
 **secrets**
+typings

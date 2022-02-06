@@ -4,13 +4,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
-from typing import Dict, List, Optional
+from typing import Dict, List
 from tldextract import extract
 from faucet_proj.faucet_option import FaucetOption
 from faucet_app.models import FaucetRequest
 from . import utils as script_utils
+import radixlib as radix
 import datetime
-import Radix
 import json
 
 @csrf_exempt
@@ -156,19 +156,21 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
     # If we get to this point here, it means that we can indeed send XRD to this wallet
     # address.
     try:
-        wallet: Radix.Wallet = settings.WALLET
+        wallet: radix.Wallet = settings.WALLET
         tx_id: str = wallet.build_sign_and_send_transaction(
-            actions = Radix.Action.new_token_transfer_action(
-                from_address = wallet.wallet_address,
-                to_address = wallet_address,
-                amount = Radix.utils.xrd_to_atto(faucet_option.xrd_amount),
-                rri = Radix.NetworkSpecificConstants.XRD[Radix.Network.STOKENET]
+            actions = (
+                wallet.action_builder
+                    .token_transfer(
+                        from_account_address = wallet.address,
+                        to_account_address = wallet_address,
+                        transfer_amount = radix.derive.atto_from_xrd(faucet_option.xrd_amount),
+                        token_rri = radix.constants.XRD_RRI['stokenet'],
+                    )
             ),
-            message = f"Here is {faucet_option.xrd_amount:.2f} XRD for your tweet: {tweet_id}",
-            encrypt_message = True,
+            message_string = f"Here is {faucet_option.xrd_amount:.2f} XRD for your tweet: {tweet_id}",
             encrypt_for_address = wallet_address
         )
-
+        
         FaucetRequest.objects.create(
             requested_at = timezone.now(),
             wallet_address = wallet_address,
