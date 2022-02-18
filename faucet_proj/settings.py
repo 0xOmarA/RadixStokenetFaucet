@@ -152,5 +152,5 @@ This is the minumum account age in months. A twitter account needs to be more th
 """
 
 FAUCET_OPTIONS: List[FaucetOption] = [
-    FaucetOption(xrd_amount = 100, cooldown_in_hours = 3),
+    FaucetOption(xrd_amount = 100, cooldown_in_hours = 12),
 ]
