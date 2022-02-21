@@ -9,6 +9,7 @@ from tldextract import extract
 from faucet_proj.faucet_option import FaucetOption
 from faucet_app.models import FaucetRequest
 from . import utils as script_utils
+from faucet_proj import secrets
 import radixlib as radix
 import datetime
 import json
@@ -152,6 +153,16 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
             )
     except ObjectDoesNotExist:
         pass
+
+    # Checking if this twitter author or wallet has been blacklisted from using the wallet service.
+    if tweet_info['author_id'] in secrets.BLACKLISTED_TWITTER_AUTHORS or wallet_address in secrets.BLACKLISTED_WALLETS:
+        return JsonResponse(
+                data = {
+                    'error': 'Blacklisted from service',
+                    'message': f'You have been blacklisted from using this service due to the a number of violations. Please contact 0xOmarA on twitter to know more.'
+                },
+                status = 400
+            )
 
     # If we get to this point here, it means that we can indeed send XRD to this wallet
     # address.
