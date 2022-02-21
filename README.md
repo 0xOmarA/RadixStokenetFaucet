@@ -55,6 +55,12 @@ twitter_bearer_token: str = "MySuperSecretKey"
 
 django_secret_key: str = 'MySuperDuperUltraSecretKey'
 """ The django secret key used to encrypt the data in Django """
+
+blacklisted_wallets: List[str] = ['sample_wallet_address']
+""" This is a list of all of the wallets which we have blacklisted """
+
+blackslisted_twitter_authors: List[str] = ['twitter_author_id']
+""" This is a list of all of the twitter authors that we have blacklisted """
 ```
 
 Once you have created and populated your `secrets.py` file, you're now ready to run and eventually deploy your faucet to the internet. To test your faucet, run the following command:

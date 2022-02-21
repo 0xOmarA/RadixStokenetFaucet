@@ -155,7 +155,7 @@ def xrd_request(request: HttpRequest) -> HttpResponse:
         pass
 
     # Checking if this twitter author or wallet has been blacklisted from using the wallet service.
-    if tweet_info['author_id'] in secrets.BLACKLISTED_TWITTER_AUTHORS or wallet_address in secrets.BLACKLISTED_WALLETS:
+    if tweet_info['author_id'] in secrets.blacklisted_twitter_authors or wallet_address in secrets.blacklisted_wallets:
         return JsonResponse(
                 data = {
                     'error': 'Blacklisted from service',
